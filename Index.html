@@ -1,0 +1,765 @@
+
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; font-family: Arial, sans-serif; }
+body { background: #1a3a1a; color: #222; font-size: 13px; }
+.nav { background: linear-gradient(135deg,#2d6a2d,#1a4a1a); padding: 8px 16px; display:flex; align-items:center; gap:12px; border-bottom:3px solid #f97316; position:sticky; top:0; z-index:100; }
+.nav-title { color:#fff; font-size:15px; font-weight:700; letter-spacing:1px; }
+.nav-back { background:#f97316; color:#fff; border:none; border-radius:6px; padding:4px 12px; cursor:pointer; font-size:12px; font-weight:700; }
+.nav-back:hover { background:#ea6c0a; }
+.nav-date { color:#f97316; font-size:11px; font-weight:700; margin-left:auto; }
+.screen { display:none; background:#f5f5f0; min-height:calc(100vh - 44px); }
+.screen.active { display:block; }
+.home-container { display:flex; flex-direction:column; align-items:center; justify-content:center; min-height:calc(100vh - 44px); gap:20px; padding:40px; }
+.home-logo h1 { color:#2d6a2d; font-size:26px; font-weight:900; text-transform:uppercase; letter-spacing:2px; text-align:center; }
+.home-logo p { color:#f97316; font-size:13px; font-weight:600; margin-top:4px; text-align:center; }
+.home-btn { width:280px; padding:20px; font-size:15px; font-weight:700; border:none; border-radius:12px; cursor:pointer; text-transform:uppercase; letter-spacing:1px; transition:all .2s; }
+.btn-g { background:linear-gradient(135deg,#2d6a2d,#4a9a4a); color:#fff; }
+.btn-o { background:linear-gradient(135deg,#f97316,#fb923c); color:#fff; }
+.home-btn:hover { transform:translateY(-2px); box-shadow:0 6px 20px rgba(0,0,0,.3); }
+.page-header { background:linear-gradient(135deg,#2d6a2d,#1a4a1a); color:#fff; padding:10px 16px; border-bottom:3px solid #f97316; display:flex; align-items:center; justify-content:space-between; }
+.page-header h2 { font-size:14px; font-weight:700; text-transform:uppercase; }
+.page-content { padding:14px; }
+.sub-menu { display:grid; grid-template-columns:1fr 1fr; gap:12px; padding:20px; }
+.smb { padding:18px 12px; font-size:12px; font-weight:700; border:none; border-radius:10px; cursor:pointer; text-align:center; text-transform:uppercase; transition:all .2s; }
+.smb:hover { transform:translateY(-1px); box-shadow:0 4px 12px rgba(0,0,0,.25); }
+.form-section { background:#fff; border-radius:10px; padding:14px; margin-bottom:12px; border:1px solid #d4e6d4; }
+.form-section h3 { color:#2d6a2d; font-size:12px; font-weight:700; margin-bottom:10px; text-transform:uppercase; border-bottom:2px solid #f97316; padding-bottom:5px; }
+.form-row { display:grid; gap:10px; margin-bottom:10px; }
+.fr2 { grid-template-columns:1fr 1fr; }
+.fr3 { grid-template-columns:1fr 1fr 1fr; }
+.fg label { display:block; font-size:10px; color:#2d6a2d; font-weight:700; margin-bottom:3px; text-transform:uppercase; }
+.fg input, .fg select, .fg textarea { width:100%; padding:6px 7px; border:1.5px solid #b8d4b8; border-radius:5px; font-size:12px; background:#f9fdf9; color:#222; outline:none; }
+.fg input:focus, .fg select:focus { border-color:#2d6a2d; background:#fff; }
+.btn-p { background:linear-gradient(135deg,#2d6a2d,#4a9a4a); color:#fff; border:none; padding:8px 18px; border-radius:6px; cursor:pointer; font-size:12px; font-weight:700; }
+.btn-o2 { background:linear-gradient(135deg,#f97316,#fb923c); color:#fff; border:none; padding:8px 18px; border-radius:6px; cursor:pointer; font-size:12px; font-weight:700; }
+.btn-s { background:#6c757d; color:#fff; border:none; padding:8px 18px; border-radius:6px; cursor:pointer; font-size:12px; font-weight:700; }
+.btn-p:hover { background:#245524; } .btn-o2:hover { background:#e66c10; }
+.act { display:flex; gap:10px; flex-wrap:wrap; padding:10px 0; }
+.tw { overflow-x:auto; border-radius:8px; border:1px solid #d4e6d4; background:#fff; }
+table { width:100%; border-collapse:collapse; font-size:11px; }
+thead th { background:#2d6a2d; color:#fff; padding:7px 8px; text-align:left; font-size:10px; text-transform:uppercase; white-space:nowrap; }
+tbody tr:nth-child(even) { background:#f5fbf5; }
+tbody tr:hover { background:#eaf5ea; }
+tbody td { padding:6px 8px; border-bottom:.5px solid #d4e6d4; }
+.br { background:#fee2e2; color:#991f1f; padding:2px 7px; border-radius:10px; font-size:10px; font-weight:700; }
+.bo { background:#fff3e0; color:#c55a00; padding:2px 7px; border-radius:10px; font-size:10px; font-weight:700; }
+.bg { background:#e8f5e9; color:#1b5e20; padding:2px 7px; border-radius:10px; font-size:10px; font-weight:700; }
+.esc-wrap { overflow-x:auto; }
+.esc-table { border-collapse:collapse; font-size:11px; min-width:900px; }
+.esc-table th { background:#f97316; color:#fff; padding:7px 5px; text-align:center; font-size:10px; text-transform:uppercase; border:.5px solid #ea6c0a; white-space:nowrap; }
+.esc-table td { padding:4px 3px; border:.5px solid #d4e6d4; vertical-align:middle; background:#fff; }
+.esc-table tr:nth-child(even) td { background:#fff9f5; }
+.esc-table select { padding:3px 2px; border:1px solid #b8d4b8; border-radius:4px; font-size:10px; background:#f9fdf9; }
+.esc-table input[type=text] { padding:3px 2px; border:1px solid #b8d4b8; border-radius:4px; font-size:10px; background:#f9fdf9; }
+.esc-table textarea { padding:3px 2px; border:1px solid #b8d4b8; border-radius:4px; font-size:10px; background:#f9fdf9; resize:none; }
+.viagem-cell div { padding:3px 4px; border:.5px solid #ddd; background:#fff8f0; text-align:center; font-size:10px; font-weight:700; color:#c55a00; }
+.docs-table { width:100%; border-collapse:collapse; font-size:11px; background:#fff; border-radius:8px; overflow:hidden; border:1px solid #d4e6d4; }
+.docs-table th { background:#2d6a2d; color:#fff; padding:8px 6px; text-align:center; font-size:10px; text-transform:uppercase; }
+.docs-table td { padding:6px; border-bottom:.5px solid #d4e6d4; vertical-align:middle; }
+.docs-table td:first-child { font-weight:600; color:#1a4a1a; font-size:11px; background:#f5fbf5; }
+.docs-table input[type=text] { width:100%; padding:5px 6px; border:1.5px solid #b8d4b8; border-radius:5px; font-size:11px; }
+.docs-table input:focus { border-color:#2d6a2d; }
+.vencida { background:#fee2e2 !important; color:#991f1f !important; font-weight:700; }
+.critica { background:#fff3e0 !important; color:#c55a00 !important; font-weight:700; }
+.ok-c { background:#e8f5e9 !important; color:#1b5e20 !important; }
+.date-disp { background:#2d6a2d; color:#fff; display:inline-block; padding:5px 14px; border-radius:20px; font-size:12px; font-weight:700; margin-bottom:12px; }
+.alerta { background:#fff3e0; border:1px solid #f97316; border-left:4px solid #f97316; border-radius:8px; padding:8px 12px; font-size:11px; color:#c55a00; margin-bottom:12px; }
+::-webkit-scrollbar { width:5px; height:5px; }
+::-webkit-scrollbar-track { background:#f0f0f0; }
+::-webkit-scrollbar-thumb { background:#2d6a2d; border-radius:3px; }
+</style>
+</head>
+<body>
+
+<div class="nav">
+  <button class="nav-back" id="navBack" onclick="goBack()" style="display:none">&#8592; Voltar</button>
+  <span class="nav-title">🌿 ATR FILIAL RECIFE</span>
+  <span class="nav-date" id="navDate"></span>
+</div>
+
+<!-- HOME -->
+<div class="screen active" id="s-home">
+  <div class="home-container">
+    <div class="home-logo">
+      <h1>🌿 ATR Filial Recife</h1>
+      <p>Sistema de Gestão Integrada</p>
+    </div>
+    <button class="home-btn btn-g" onclick="goto('s-estoque')">📦 ESTOQUE</button>
+    <button class="home-btn btn-o" onclick="goto('s-docs')">📋 GESTÃO DE DOCUMENTOS</button>
+    <button class="home-btn btn-g" onclick="goto('s-escala-home')">🚛 ESCALA</button>
+  </div>
+</div>
+
+<!-- ESTOQUE HOME -->
+<div class="screen" id="s-estoque">
+  <div class="page-header"><h2>📦 Estoque Geral</h2></div>
+  <div class="sub-menu">
+    <button class="smb btn-g" onclick="goto('s-entrada')">➕ Entrada de Produtos</button>
+    <button class="smb btn-o" onclick="goto('s-saida')">➖ Saída de Produtos</button>
+    <button class="smb btn-g" onclick="goto('s-consulta')">🔍 Consultar Estoque</button>
+    <button class="smb btn-o" onclick="goto('s-novoprod')">🆕 Novo Produto</button>
+  </div>
+</div>
+
+<!-- ENTRADA -->
+<div class="screen" id="s-entrada">
+  <div class="page-header"><h2>➕ Entrada de Produtos</h2></div>
+  <div class="page-content">
+    <div class="form-section">
+      <h3>Registrar Entrada</h3>
+      <div class="form-row fr2">
+        <div class="fg"><label>Produto</label><select id="ent-prod"></select></div>
+        <div class="fg"><label>UND</label><select id="ent-und"><option>UND</option><option>PÇ</option><option>PCT</option><option>FD</option><option>CX</option></select></div>
+      </div>
+      <div class="form-row fr3">
+        <div class="fg"><label>Setor</label><select id="ent-setor"><option>COPA</option><option>SECRETÁRIO</option><option>COZINHA</option><option>LIMPEZA</option><option>ALMOXARIFADO</option><option>DIVERSOS</option></select></div>
+        <div class="fg"><label>Quantidade</label><input type="number" id="ent-qtd" min="1" value="1"></div>
+        <div class="fg"><label>Data da Entrada</label><input type="date" id="ent-data"></div>
+      </div>
+      <div class="form-row fr2">
+        <div class="fg"><label>Valor Unitário (R$)</label><input type="number" id="ent-valor" min="0" step="0.01" placeholder="0,00"></div>
+      </div>
+      <div class="act">
+        <button class="btn-p" onclick="registrarEntrada()">✅ Registrar Entrada</button>
+        <button class="btn-s" onclick="goto('s-estoque')">Cancelar</button>
+      </div>
+    </div>
+    <div class="form-section">
+      <h3>Últimas Entradas</h3>
+      <div class="tw"><table>
+        <thead><tr><th>Produto</th><th>UND</th><th>Setor</th><th>Qtd</th><th>Data</th><th>Vl.Unit</th></tr></thead>
+        <tbody id="tb-ent"></tbody>
+      </table></div>
+    </div>
+  </div>
+</div>
+
+<!-- SAÍDA -->
+<div class="screen" id="s-saida">
+  <div class="page-header"><h2>➖ Saída de Produtos</h2></div>
+  <div class="page-content">
+    <div class="form-section">
+      <h3>Registrar Saída</h3>
+      <div class="form-row fr2">
+        <div class="fg"><label>Produto</label><select id="sai-prod"></select></div>
+        <div class="fg"><label>UND</label><select id="sai-und"><option>UND</option><option>PÇ</option><option>PCT</option><option>FD</option><option>CX</option></select></div>
+      </div>
+      <div class="form-row fr3">
+        <div class="fg"><label>Quantidade</label><input type="number" id="sai-qtd" min="1" value="1"></div>
+        <div class="fg"><label>Data de Saída</label><input type="date" id="sai-data"></div>
+        <div class="fg"><label>Solicitante</label><input type="text" id="sai-solic" placeholder="Nome do solicitante"></div>
+      </div>
+      <div class="act">
+        <button class="btn-o2" onclick="registrarSaida()">✅ Registrar Saída</button>
+        <button class="btn-s" onclick="goto('s-estoque')">Cancelar</button>
+      </div>
+    </div>
+    <div class="form-section">
+      <h3>Últimas Saídas</h3>
+      <div class="tw"><table>
+        <thead><tr><th>Produto</th><th>UND</th><th>Qtd</th><th>Data</th><th>Solicitante</th></tr></thead>
+        <tbody id="tb-sai"></tbody>
+      </table></div>
+    </div>
+  </div>
+</div>
+
+<!-- CONSULTA -->
+<div class="screen" id="s-consulta">
+  <div class="page-header"><h2>🔍 Consultar Estoque</h2></div>
+  <div class="page-content">
+    <div class="form-section">
+      <h3>Posição Atual</h3>
+      <div class="form-row fr2" style="align-items:flex-end;">
+        <div class="fg"><label>Filtrar produto</label><input type="text" id="filtro" placeholder="Digite para filtrar..." oninput="renderEstoque()"></div>
+        <div><button class="btn-o2" onclick="gerarPDFEstoque()">📄 Gerar Relatório PDF</button></div>
+      </div>
+      <div id="alerta-baixo" class="alerta" style="display:none"></div>
+      <div class="tw"><table>
+        <thead><tr><th>Produto</th><th>UND</th><th>Setor</th><th>Estoque</th><th>Vl.Unit</th><th>Total R$</th><th>Status</th></tr></thead>
+        <tbody id="tb-est"></tbody>
+      </table></div>
+      <div id="total-val" style="text-align:right;font-weight:700;color:#2d6a2d;margin-top:8px;font-size:13px;"></div>
+    </div>
+  </div>
+</div>
+
+<!-- NOVO PRODUTO -->
+<div class="screen" id="s-novoprod">
+  <div class="page-header"><h2>🆕 Novo Produto</h2></div>
+  <div class="page-content">
+    <div class="form-section">
+      <h3>Cadastrar Produto</h3>
+      <div class="form-row"><div class="fg"><label>Nome do Produto</label><input type="text" id="np-nome" placeholder="Nome completo"></div></div>
+      <div class="form-row fr2">
+        <div class="fg"><label>UND</label><select id="np-und"><option>UND</option><option>PÇ</option><option>PCT</option><option>FD</option><option>CX</option></select></div>
+        <div class="fg"><label>Setor</label><select id="np-setor"><option>COPA</option><option>SECRETÁRIO</option><option>COZINHA</option><option>LIMPEZA</option><option>ALMOXARIFADO</option><option>DIVERSOS</option></select></div>
+      </div>
+      <div class="act"><button class="btn-p" onclick="addProduto()">✅ Salvar</button></div>
+    </div>
+    <div class="form-section">
+      <h3>Produtos Cadastrados</h3>
+      <div class="tw"><table>
+        <thead><tr><th>#</th><th>Produto</th><th>UND</th><th>Setor</th><th>Ação</th></tr></thead>
+        <tbody id="tb-prods"></tbody>
+      </table></div>
+    </div>
+  </div>
+</div>
+
+<!-- DOCS -->
+<div class="screen" id="s-docs">
+  <div class="page-header"><h2>📋 Gestão de Documentos — Filial Recife</h2></div>
+  <div class="page-content">
+    <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;margin-bottom:12px;">
+      <span class="date-disp" id="docs-date"></span>
+      <div style="display:flex;gap:8px;">
+        <button class="btn-p" onclick="salvarDocs()">💾 Salvar</button>
+        <button class="btn-o2" onclick="goto('s-estoque')">📦 Ir para Estoque</button>
+      </div>
+    </div>
+    <div class="tw">
+      <table class="docs-table">
+        <thead><tr>
+          <th style="width:180px">LICENÇA</th>
+          <th style="width:95px">VALIDADE</th>
+          <th style="width:75px">DIAS FALTAM</th>
+          <th style="width:75px">MARGEM (dias)</th>
+          <th style="width:90px">SOLICITAR</th>
+        </tr></thead>
+        <tbody id="docs-tb"></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- ESCALA HOME -->
+<div class="screen" id="s-escala-home">
+  <div class="page-header"><h2>🚛 Escala</h2></div>
+  <div class="sub-menu">
+    <button class="smb btn-o" onclick="goto('s-escala')">📋 Montar Escala</button>
+    <button class="smb btn-g" onclick="goto('s-nov-mot')">👤 Novo Motorista</button>
+    <button class="smb btn-g" onclick="goto('s-nov-vt')">🚛 Nova VT</button>
+    <button class="smb btn-o" onclick="goto('s-nov-placa')">🔖 Nova Placa</button>
+  </div>
+</div>
+
+<!-- ESCALA -->
+<div class="screen" id="s-escala">
+  <div class="page-header"><h2>📋 Escala — ATR Filial Recife</h2></div>
+  <div class="page-content">
+    <div class="form-section">
+      <div class="form-row fr2" style="align-items:flex-end;">
+        <div class="fg"><label>Data</label><input type="date" id="esc-data" oninput="calcSemana()"></div>
+        <div id="sem-disp" style="font-size:10px;color:#2d6a2d;font-weight:700;padding:4px 0;line-height:1.8;"></div>
+      </div>
+    </div>
+    <div class="esc-wrap">
+      <table class="esc-table">
+        <thead>
+          <tr>
+            <th style="width:45px">VT</th>
+            <th style="width:65px">PLACA</th>
+            <th style="width:105px">MOTORISTA</th>
+            <th style="width:52px">HORÁRIO</th>
+            <th style="width:40px">VIAGEM</th>
+            <th style="width:52px">OTR</th>
+            <th style="width:90px">CLIENTE</th>
+            <th style="width:95px">EQUIPAMENTO<br><span style="font-size:9px;font-weight:400">(10 car. cada)</span></th>
+            <th style="width:140px">DESTINO<br><span style="font-size:9px;font-weight:400">(15 car. cada)</span></th>
+            <th style="width:110px">OBSERVAÇÕES</th>
+          </tr>
+        </thead>
+        <tbody id="esc-tbody"></tbody>
+      </table>
+    </div>
+    <div class="form-section" style="margin-top:12px;">
+      <div class="fg"><label>Observações Gerais</label>
+        <textarea id="esc-obs-geral" rows="3" maxlength="200" placeholder="Observações gerais da escala..."></textarea>
+      </div>
+    </div>
+    <div class="act">
+      <button class="btn-p" onclick="salvarEscala()">💾 Salvar Escala</button>
+      <button class="btn-o2" onclick="gerarPDFEscala()">📄 Gerar PDF</button>
+      <button class="btn-s" onclick="goto('s-escala-home')">Voltar</button>
+    </div>
+  </div>
+</div>
+
+<!-- NOVO MOTORISTA -->
+<div class="screen" id="s-nov-mot">
+  <div class="page-header"><h2>👤 Novo Motorista</h2></div>
+  <div class="page-content">
+    <div class="form-section">
+      <h3>Cadastrar Motorista</h3>
+      <div class="fg" style="margin-bottom:10px;"><label>Nome (máx. 15 caracteres)</label><input type="text" id="nov-mot" maxlength="15" placeholder="Nome do motorista"></div>
+      <div class="act"><button class="btn-p" onclick="addMotorista()">✅ Cadastrar</button></div>
+    </div>
+    <div class="form-section"><h3>Motoristas Cadastrados</h3>
+      <div class="tw"><table><thead><tr><th>#</th><th>Motorista</th><th>Ação</th></tr></thead><tbody id="tb-mots"></tbody></table></div>
+    </div>
+  </div>
+</div>
+
+<!-- NOVA VT -->
+<div class="screen" id="s-nov-vt">
+  <div class="page-header"><h2>🚛 Nova VT</h2></div>
+  <div class="page-content">
+    <div class="form-section">
+      <h3>Cadastrar VT</h3>
+      <div class="fg" style="margin-bottom:10px;"><label>Número VT</label><input type="text" id="nov-vt" placeholder="Ex: 50"></div>
+      <div class="act"><button class="btn-p" onclick="addVT()">✅ Cadastrar</button></div>
+    </div>
+    <div class="form-section"><h3>VTs Cadastradas</h3>
+      <div class="tw"><table><thead><tr><th>#</th><th>VT</th><th>Ação</th></tr></thead><tbody id="tb-vts"></tbody></table></div>
+    </div>
+  </div>
+</div>
+
+<!-- NOVA PLACA -->
+<div class="screen" id="s-nov-placa">
+  <div class="page-header"><h2>🔖 Nova Placa</h2></div>
+  <div class="page-content">
+    <div class="form-section">
+      <h3>Cadastrar Placa</h3>
+      <div class="form-row fr2">
+        <div class="fg"><label>Placa</label><input type="text" id="nov-placa" maxlength="8" placeholder="Ex: ABC1D23" style="text-transform:uppercase"></div>
+        <div class="fg"><label>VT Relacionada</label><select id="nov-placa-vt"></select></div>
+      </div>
+      <div class="act"><button class="btn-p" onclick="addPlaca()">✅ Cadastrar</button></div>
+    </div>
+    <div class="form-section"><h3>Placas Cadastradas</h3>
+      <div class="tw"><table><thead><tr><th>Placa</th><th>VT</th><th>Ação</th></tr></thead><tbody id="tb-placas"></tbody></table></div>
+    </div>
+  </div>
+</div>
+
+<script>
+const PRODS_BASE = ["CLIPS ECCO No 04 50 UND","COLA BASTAO 40G ONDA","COLA INSTANTENEA 793 TEKBOND 20G","ENVELOPES PERSONALIZADOS ATR","ESTOJO DE MARCADORES WHITE BOARD","FITA ADESIVA CREPE 48X50 EUROCEL","FURADOR DE PAPEL MAPED OFFICE","GRAMPEADOR METAL 11,5 CM 25 FOLHAS JOCAROFFICE","GRAMPEADOR METAL 11,5 CM 25 FOLHAS MASTERPRINT","GRAMPO GALVANIZADO BW 26/6 5000 UND","MARCADOR P/ QUADRO BR AZUL MASTERPRINT","MARCADOR P/ QUADRO BR PRETO MASTERPRINT","MARCADOR P/ QUADRO BR VERDE MASTERPRINT","MARCADOR P/ QUADRO BR VERMELHO MASTERPRINT","MARCADOR P/ RETRO PROJETOR AZUL","MARCADOR P/ RETRO PROJETOR VERMELHO","MARCADOR RECARREGAVEL PRETO PILOT","PAPEL A4 SULFITE 75G SUZANO","PRANCHETA ACRILICO OFICIO PRENDEDOR METAL","REGUA","TINTA REFIL BULK M504/544 YELLOW MASTERPRINT","TINTA REFIL BULK MP04/44 BLACK MASTERPRINT","TINTA REFIL BULK MP04/44 CYAN MASTERPRINT","TINTA REFIL BULK MP04/44 MARGENTA MASTERPRINT","AEROSOL BAYGON ACAO TOTAL 360ML","AEROSOL LIMPA CONTATOS","AEROSOL PODEROSO 400ML MATA BARATA","AEROSOL RAID ESSENCIAL","AIR CLEAN FLORAL SL QUIMILAR","ALCOOL LIQUIDO 70% SL FACILITA","AR GRADAVEL AEROSOL 400ML CHA BRANCO","CADEADO PADO LT 3000L","CLORO ATIVO 2% SL VALENCA","DESINFETANTE COM CAPIM LIMAO 5L VALENCA","DETERGENTE LAVA LOUCA NEUTRO 5L VALENCA","DISCO DE CORTE STARRETT 4POL","ELEMENTO AR PRIMARIO","ELEMENTO COMB","ELEMENTO LUBRIF","ELETRODO 6013 2,50MM - VONDER","ESPONJA MULT PROF IONS DE PRATA 9410 BETTAN","ESPONJA MULTI USO","FITA ISOLANTE 18MM X 20MM - IMPERIAL","FLANELA 28X48 AMARELA LIMPOTEX","GOTAS PERFUMADAS PIMENTA ROSA 140ML DEOLINE","JOGO DE CHAVE BOLA C/09 PRETA CURTA PRIM","LAMPADA 67 24V","LAMPADA PINGAO 24V","LIMPA CONTATO 300ML - PRATIK","LIMPA CONTATOS 300ML - ORBI","LIMPA VIDROS 5L VALENCA","MAO DE OBRA","NAFTALINA VALENCA 24G","OLEO 15W40 C14 KARTER TRUCK TURBO BALDE 20L","OLEO 80 GL4 KARTER GEAR OIL K-80 1LT","PANO DE CHAO FLANELADO TIPO C 40X62 LIMPOTEX","PAPEL HIGIENICO PCT 12 SUBLIME","PAPEL HIGIENICO PCT 12 VELUD","PASTILHA SANITARIA TRID-D LAVANDA 30G","PF RM BOLEADA FENDA 5/32 X 2 NC ZB","PF RM PANELA PHILIPS 4 X 25 BC","PF SEXT FLANG 8.8 10 X 40 MA RT","PF SEXT FLANG 8.8 8 X 25 MA RT - CH13","PM CAMINHAO 275/80 R22.5 BXM1 L CONTI","PM CAMINHAO 275/80 R22.5 BXM1 L GOODY","PM CAMINHAO 275/80 R22.5 BXM1 L IMPOR","PM CAMINHAO 275/80 R22.5 BXM1 L SPEED","PORCA SEXT 04 MA ZB - CH7","PORCA SEXT 12 MA ZB - CH19","PORCA SEXT POLEG 5/32 NC ZB","PORTA ELETROLDO SIGMA 1000A CD2567 - LOTUS","ROLO EPOXY RESIPRO 09CM C/CABO - ROMA","ROLO POLIESTER 9CM ANTIRRESP CB 822 09 ROMA","SABAO EM PO BEM TE VI TRAD. 400G","SABONETE LIQUIDO BRANCO ERVA DOCE 5L","SOQUETE PISCA","TARUGO GONZO TORNEADO 3/4 PL","THINNER 4,5 LITROS - REPARAUTO","TINTA LATA 3,6L ESMALTE INDUSTRIAL VERDE POLIDOR","TINTA LATA 3L MADEIRAS E METAIS CINZ IQUINE","TINTA SPRAY PRATIK 400ML/190G AMARELO","TINTA SPRAY PRATIK 400ML/190G BRANCO","TINTA SPRAY PRATIK 400ML/190G PRETO","TINTA SPRAY VERDE CLARO 400ML/190G","TOALHA DE PAPEL ELITE 21X20 1000FLS","TOALHA DE PAPEL KAMI 18X19 1000FLS","TOALHA DE PAPEL NOBRE 23X20 1000FLS","TOMADA 1S 2P+T 20A 250V ARIA","TORNEIRA JARDIM PLAST 1/2E3/4 BIC PT - REBOUCAS","TRINCHA 312 1 POL - ROMA","VORAZ AL300 5L DESENGRAXANTE QUIMILAB","ZARCAO REPARAUTO 3,6 CINZA"];
+const VT_PLACA = {"25":"RLV4A36","26":"RLZ9D94","31":"SIH5D09","34":"JCV4J66","38":"TTV6D88","32":"SYP9D80","39":"TEP2I76","44":"ELX1A42","24":"RLT2114","45":"BR6D73"};
+const DESTINOS = ["","CTR-CANDEIAS","UTM","CTR-PE","UBA","LARA CENTRAL","PB AMBIENTAL","ECOBRAS","DS DE FRANCA","GA AMBIENTAL","RCC AMBIENTAL","BOVIL","CTR CARUARU","ENTREGA","RECOLHIMENTO"];
+const LICENCAS = ["LICENCA SIMPLIFICADA","ALVARA DE LOCALIZACAO","BOMBEIRO REGULARIDADE","BOMBEIRO CONTRA INCENDIO","LICENCA DE OPERACAO CPRH","EMLURB","CADASTROS TECNICOS FEDERAIS","MINISTERIO DO MEIO AMBIENTE","SISTEMA MTR","AUTORIZACAO CR - IBAMA"];
+
+let ST = {
+  produtos:[...PRODS_BASE], estoque:{}, entradas:[], saidas:[],
+  motoristas:["ISAIAS SESINO","MARCELO SILVA","NILSON SIQUEIRA","RENATO TEODOSIO","FLAVIO SOUZA","MARIO PINA"],
+  vts:Object.keys(VT_PLACA), placas:{...VT_PLACA}, docsData:{}, escalaData:{}
+};
+try { const s=localStorage.getItem('atr3'); if(s) ST={...ST,...JSON.parse(s)}; } catch(e){}
+function save(){ try{ localStorage.setItem('atr3',JSON.stringify(ST)); }catch(e){} }
+
+// NAV
+let hist=[];
+function goto(id){ hist.push(document.querySelector('.screen.active').id); show(id); }
+function goBack(){ if(hist.length) show(hist.pop()); }
+function show(id){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  document.getElementById('navBack').style.display=id==='s-home'?'none':'';
+  if(id==='s-entrada'||id==='s-saida') populateProds();
+  if(id==='s-consulta') renderEstoque();
+  if(id==='s-novoprod') renderProds();
+  if(id==='s-docs') renderDocs();
+  if(id==='s-escala') renderEscala();
+  if(id==='s-nov-mot') renderMots();
+  if(id==='s-nov-vt') renderVTs();
+  if(id==='s-nov-placa'){ renderPlacas(); populatePlacaVT(); }
+}
+
+function hoje(){ return new Date().toISOString().split('T')[0]; }
+function fmt(s){ if(!s) return ''; const p=s.split('-'); return p.length===3?`${p[2]}/${p[1]}/${p[0]}`:s; }
+function updDate(){
+  const d=new Date();
+  document.getElementById('navDate').textContent=d.toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit',year:'numeric'});
+  const el=document.getElementById('docs-date');
+  if(el) el.textContent='Data: '+d.toLocaleDateString('pt-BR',{weekday:'long',day:'2-digit',month:'long',year:'numeric'});
+}
+updDate(); setInterval(updDate,60000);
+document.getElementById('ent-data').value=hoje();
+document.getElementById('sai-data').value=hoje();
+
+function populateProds(){
+  ['ent-prod','sai-prod'].forEach(id=>{
+    const s=document.getElementById(id); if(!s) return;
+    s.innerHTML='<option value="">Selecione...</option>';
+    [...ST.produtos].sort().forEach(p=>{ const o=document.createElement('option'); o.value=o.textContent=p; s.appendChild(o); });
+  });
+}
+
+function addProduto(){
+  const n=document.getElementById('np-nome').value.trim().toUpperCase();
+  if(!n) return alert('Digite o nome!');
+  if(ST.produtos.includes(n)) return alert('Ja cadastrado!');
+  ST.produtos.push(n);
+  if(!ST.estoque[n]) ST.estoque[n]={qtd:0,und:document.getElementById('np-und').value,setor:document.getElementById('np-setor').value,valor:0};
+  save(); renderProds(); document.getElementById('np-nome').value=''; alert('Produto cadastrado!');
+}
+function renderProds(){
+  document.getElementById('tb-prods').innerHTML=[...ST.produtos].sort().map((p,i)=>
+    `<tr><td>${i+1}</td><td>${p}</td><td>${ST.estoque[p]?.und||'-'}</td><td>${ST.estoque[p]?.setor||'-'}</td>
+    <td><button class="btn-s" style="font-size:10px;padding:3px 8px" onclick="remProd('${p.replace(/'/g,"\\'")}')">Remover</button></td></tr>`
+  ).join('');
+}
+function remProd(p){ if(!confirm('Remover "'+p+'"?')) return; ST.produtos=ST.produtos.filter(x=>x!==p); save(); renderProds(); }
+
+function registrarEntrada(){
+  const prod=document.getElementById('ent-prod').value;
+  const und=document.getElementById('ent-und').value;
+  const setor=document.getElementById('ent-setor').value;
+  const qtd=parseInt(document.getElementById('ent-qtd').value)||0;
+  const data=document.getElementById('ent-data').value||hoje();
+  const valor=parseFloat(document.getElementById('ent-valor').value)||0;
+  if(!prod||!qtd) return alert('Preencha produto e quantidade!');
+  ST.entradas.unshift({prod,und,setor,qtd,data,valor});
+  if(!ST.estoque[prod]) ST.estoque[prod]={qtd:0,und,setor,valor};
+  ST.estoque[prod].qtd+=qtd;
+  if(valor) ST.estoque[prod].valor=valor;
+  ST.estoque[prod].und=und; ST.estoque[prod].setor=setor;
+  save();
+  document.getElementById('tb-ent').innerHTML=ST.entradas.slice(0,20).map(e=>
+    `<tr><td>${e.prod}</td><td>${e.und}</td><td>${e.setor}</td><td>${e.qtd}</td><td>${fmt(e.data)}</td><td>R$ ${(e.valor||0).toFixed(2)}</td></tr>`
+  ).join('');
+  alert('Entrada registrada!');
+}
+
+function registrarSaida(){
+  const prod=document.getElementById('sai-prod').value;
+  const und=document.getElementById('sai-und').value;
+  const qtd=parseInt(document.getElementById('sai-qtd').value)||0;
+  const data=document.getElementById('sai-data').value||hoje();
+  const solic=document.getElementById('sai-solic').value;
+  if(!prod||!qtd) return alert('Preencha produto e quantidade!');
+  const est=(ST.estoque[prod]&&ST.estoque[prod].qtd)||0;
+  if(qtd>est) return alert('Estoque insuficiente! Disponivel: '+est);
+  ST.saidas.unshift({prod,und,qtd,data,solic});
+  ST.estoque[prod].qtd-=qtd;
+  save();
+  document.getElementById('tb-sai').innerHTML=ST.saidas.slice(0,20).map(s=>
+    `<tr><td>${s.prod}</td><td>${s.und}</td><td>${s.qtd}</td><td>${fmt(s.data)}</td><td>${s.solic}</td></tr>`
+  ).join('');
+  alert('Saida registrada!');
+}
+
+function renderEstoque(){
+  const filtro=(document.getElementById('filtro')?.value||'').toLowerCase();
+  const baixos=[]; let total=0; const rows=[];
+  [...ST.produtos].sort().filter(p=>!filtro||p.toLowerCase().includes(filtro)).forEach(p=>{
+    const info=ST.estoque[p]||{qtd:0,und:'-',setor:'-',valor:0};
+    const t=info.qtd*(info.valor||0); total+=t;
+    let badge='';
+    if(info.qtd<=0) badge='<span class="br">SEM ESTOQUE</span>';
+    else if(info.qtd<2){ badge='<span class="bo">BAIXO</span>'; baixos.push(p); }
+    else badge='<span class="bg">OK</span>';
+    rows.push(`<tr><td>${p}</td><td>${info.und||'-'}</td><td>${info.setor||'-'}</td>
+      <td style="font-weight:700;color:${info.qtd<2?'#c55a00':'#2d6a2d'}">${info.qtd}</td>
+      <td>R$ ${(info.valor||0).toFixed(2)}</td><td>R$ ${t.toFixed(2)}</td><td>${badge}</td></tr>`);
+  });
+  document.getElementById('tb-est').innerHTML=rows.join('');
+  const al=document.getElementById('alerta-baixo');
+  al.style.display=baixos.length?'block':'none';
+  if(baixos.length) al.textContent='Estoque abaixo de 2: '+baixos.join(', ');
+  document.getElementById('total-val').textContent='Valor Total em Estoque: R$ '+total.toFixed(2);
+}
+
+function renderDocs(){
+  document.getElementById('docs-tb').innerHTML=LICENCAS.map((lic,i)=>{
+    const d=ST.docsData[i]||{val:'',marg:''};
+    return `<tr>
+      <td>${lic}</td>
+      <td><input type="text" maxlength="10" placeholder="DD/MM/AAAA" value="${d.val||''}" oninput="calcDoc(${i})" id="dv-${i}"></td>
+      <td id="dd-${i}" class="ok-c" style="text-align:center;font-weight:700;"></td>
+      <td><input type="text" maxlength="6" placeholder="dias" value="${d.marg||''}" oninput="calcDoc(${i})" id="dm-${i}" style="text-align:center;"></td>
+      <td id="ds-${i}" style="text-align:center;font-size:10px;font-weight:700;color:#2d6a2d;"></td>
+    </tr>`;
+  }).join('');
+  LICENCAS.forEach((_,i)=>calcDoc(i));
+}
+function calcDoc(i){
+  const val=document.getElementById(`dv-${i}`)?.value||'';
+  const margStr=document.getElementById(`dm-${i}`)?.value||'';
+  const ddC=document.getElementById(`dd-${i}`);
+  const dsC=document.getElementById(`ds-${i}`);
+  if(!ddC) return;
+  const p=val.split('/');
+  if(p.length===3&&p[2].length===4){
+    const dv=new Date(`${p[2]}-${p[1]}-${p[0]}`);
+    const dh=new Date(); dh.setHours(0,0,0,0);
+    const diff=Math.round((dv-dh)/86400000);
+    ddC.textContent=diff+(diff===1?' dia':' dias');
+    ddC.className=diff<0?'vencida':diff<=30?'critica':'ok-c';
+    const marg=parseInt(margStr)||0;
+    if(marg>0){ const ds=new Date(dv); ds.setDate(ds.getDate()-marg); dsC.textContent=ds.toLocaleDateString('pt-BR'); }
+    else dsC.textContent='';
+  } else { ddC.textContent=''; ddC.className='ok-c'; dsC.textContent=''; }
+  if(!ST.docsData[i]) ST.docsData[i]={};
+  ST.docsData[i].val=val; ST.docsData[i].marg=margStr;
+}
+function salvarDocs(){ LICENCAS.forEach((_,i)=>calcDoc(i)); save(); alert('Documentos salvos!'); }
+
+// ESCALA
+function vtOpts(sel){ return ST.vts.map(v=>`<option value="${v}"${sel==v?' selected':''}>${v}</option>`).join(''); }
+function motOpts(sel){ return ST.motoristas.map(m=>`<option value="${m}"${sel==m?' selected':''}>${m.substring(0,15)}</option>`).join(''); }
+function dstOpts(sel){ return DESTINOS.map(d=>`<option value="${d}"${sel==d?' selected':''}>${d}</option>`).join(''); }
+
+function renderEscala(){
+  const rows=[];
+  for(let r=0;r<6;r++){
+    const rd=(ST.escalaData.rows&&ST.escalaData.rows[r])||{};
+    rows.push(`<tr>
+      <td style="text-align:center;">
+        <select style="width:42px" onchange="autoPlaca(${r},this.value)" id="vt-${r}">
+          <option value="">-</option>${vtOpts(rd.vt)}
+        </select>
+      </td>
+      <td><input type="text" id="placa-${r}" value="${rd.placa||''}" maxlength="8" style="width:62px;text-transform:uppercase" readonly></td>
+      <td><select id="mot-${r}" style="width:102px"><option value="">-</option>${motOpts(rd.mot)}</select></td>
+      <td><input type="text" id="hor-${r}" value="${rd.hor||''}" maxlength="5" placeholder="07:00" style="width:48px"></td>
+      <td class="viagem-cell"><div>1a</div><div>2a</div><div>3a</div></td>
+      <td><input type="text" id="otr-${r}" value="${rd.otr||''}" maxlength="7" style="width:50px"></td>
+      <td>
+        <input type="text" id="cli1-${r}" value="${rd.cli1||''}" style="width:86px;margin-bottom:2px;display:block">
+        <input type="text" id="cli2-${r}" value="${rd.cli2||''}" style="width:86px;margin-bottom:2px;display:block">
+        <input type="text" id="cli3-${r}" value="${rd.cli3||''}" style="width:86px;display:block">
+      </td>
+      <td>
+        <input type="text" id="eq1-${r}" value="${rd.eq1||''}" maxlength="10" style="width:90px;margin-bottom:3px;display:block" placeholder="__________">
+        <input type="text" id="eq2-${r}" value="${rd.eq2||''}" maxlength="10" style="width:90px;margin-bottom:3px;display:block" placeholder="__________">
+        <input type="text" id="eq3-${r}" value="${rd.eq3||''}" maxlength="10" style="width:90px;display:block" placeholder="__________">
+      </td>
+      <td>
+        <select id="dst1-${r}" style="width:135px;margin-bottom:3px;display:block"><option value="">-</option>${dstOpts(rd.dst1)}</select>
+        <select id="dst2-${r}" style="width:135px;margin-bottom:3px;display:block"><option value="">-</option>${dstOpts(rd.dst2)}</select>
+        <select id="dst3-${r}" style="width:135px;display:block"><option value="">-</option>${dstOpts(rd.dst3)}</select>
+      </td>
+      <td><textarea id="obs-${r}" rows="4" maxlength="100" style="width:106px;font-size:10px">${rd.obs||''}</textarea></td>
+    </tr>`);
+  }
+  document.getElementById('esc-tbody').innerHTML=rows.join('');
+  if(ST.escalaData.data){ document.getElementById('esc-data').value=ST.escalaData.data; calcSemana(); }
+  if(ST.escalaData.obsGeral) document.getElementById('esc-obs-geral').value=ST.escalaData.obsGeral;
+  for(let r=0;r<6;r++){
+    const rd=(ST.escalaData.rows&&ST.escalaData.rows[r])||{};
+    if(rd.vt){ const el=document.getElementById(`placa-${r}`); if(el) el.value=ST.placas[rd.vt]||''; }
+  }
+}
+function autoPlaca(r,vt){ const el=document.getElementById(`placa-${r}`); if(el) el.value=ST.placas[vt]||''; }
+function calcSemana(){
+  const val=document.getElementById('esc-data').value; if(!val) return;
+  const d=new Date(val+'T12:00:00');
+  const dias=['Dom','Seg','Ter','Qua','Qui','Sex','Sab'];
+  const dow=d.getDay();
+  const seg=new Date(d); seg.setDate(d.getDate()-(dow===0?6:dow-1));
+  let html='<b>Semana:</b> ';
+  for(let i=0;i<7;i++){ const dd=new Date(seg); dd.setDate(seg.getDate()+i); html+=`<span style="margin-right:6px">${dias[dd.getDay()]} ${dd.toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit'})}</span>`; }
+  document.getElementById('sem-disp').innerHTML=html;
+}
+function coletarEscala(){
+  const rows=[];
+  for(let r=0;r<6;r++) rows.push({
+    vt:document.getElementById(`vt-${r}`)?.value||'',
+    placa:document.getElementById(`placa-${r}`)?.value||'',
+    mot:document.getElementById(`mot-${r}`)?.value||'',
+    hor:document.getElementById(`hor-${r}`)?.value||'',
+    otr:document.getElementById(`otr-${r}`)?.value||'',
+    cli1:document.getElementById(`cli1-${r}`)?.value||'',
+    cli2:document.getElementById(`cli2-${r}`)?.value||'',
+    cli3:document.getElementById(`cli3-${r}`)?.value||'',
+    eq1:document.getElementById(`eq1-${r}`)?.value||'',
+    eq2:document.getElementById(`eq2-${r}`)?.value||'',
+    eq3:document.getElementById(`eq3-${r}`)?.value||'',
+    dst1:document.getElementById(`dst1-${r}`)?.value||'',
+    dst2:document.getElementById(`dst2-${r}`)?.value||'',
+    dst3:document.getElementById(`dst3-${r}`)?.value||'',
+    obs:document.getElementById(`obs-${r}`)?.value||'',
+  });
+  return rows;
+}
+function salvarEscala(){
+  ST.escalaData={data:document.getElementById('esc-data').value,obsGeral:document.getElementById('esc-obs-geral').value,rows:coletarEscala()};
+  save(); alert('Escala salva!');
+}
+
+function renderMots(){
+  document.getElementById('tb-mots').innerHTML=ST.motoristas.map((m,i)=>
+    `<tr><td>${i+1}</td><td>${m}</td><td><button class="btn-s" style="font-size:10px;padding:3px 8px" onclick="remMot(${i})">Remover</button></td></tr>`).join('');
+}
+function addMotorista(){ const n=document.getElementById('nov-mot').value.trim().toUpperCase(); if(!n) return alert('Digite o nome!'); ST.motoristas.push(n); save(); renderMots(); document.getElementById('nov-mot').value=''; }
+function remMot(i){ ST.motoristas.splice(i,1); save(); renderMots(); }
+function renderVTs(){
+  document.getElementById('tb-vts').innerHTML=ST.vts.map((v,i)=>
+    `<tr><td>${i+1}</td><td>VT ${v}</td><td><button class="btn-s" style="font-size:10px;padding:3px 8px" onclick="remVT(${i})">Remover</button></td></tr>`).join('');
+}
+function addVT(){ const v=document.getElementById('nov-vt').value.trim(); if(!v) return alert('Digite o numero!'); if(ST.vts.includes(v)) return alert('VT ja cadastrada!'); ST.vts.push(v); save(); renderVTs(); document.getElementById('nov-vt').value=''; }
+function remVT(i){ ST.vts.splice(i,1); save(); renderVTs(); }
+function populatePlacaVT(){ document.getElementById('nov-placa-vt').innerHTML=ST.vts.map(v=>`<option value="${v}">VT ${v}</option>`).join(''); }
+function renderPlacas(){
+  document.getElementById('tb-placas').innerHTML=Object.entries(ST.placas).map(([pl,vt])=>
+    `<tr><td>${pl}</td><td>VT ${vt}</td><td><button class="btn-s" style="font-size:10px;padding:3px 8px" onclick="remPlaca('${pl}')">Remover</button></td></tr>`).join('');
+}
+function addPlaca(){ const p=document.getElementById('nov-placa').value.trim().toUpperCase(); const v=document.getElementById('nov-placa-vt').value; if(!p) return alert('Digite a placa!'); ST.placas[v]=p; save(); renderPlacas(); document.getElementById('nov-placa').value=''; }
+function remPlaca(p){ delete ST.placas[p]; save(); renderPlacas(); }
+
+// ── PDF REAL com jsPDF ───────────────────────────────────
+function gerarPDFEstoque(){
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF({ orientation:'landscape', unit:'mm', format:'a4' });
+
+  // Cabecalho
+  doc.setFillColor(45,106,45);
+  doc.rect(0,0,297,18,'F');
+  doc.setTextColor(255,255,255);
+  doc.setFontSize(13);
+  doc.setFont('helvetica','bold');
+  doc.text('ATR FILIAL RECIFE - RELATORIO DE ESTOQUE', 148, 11, {align:'center'});
+
+  doc.setFillColor(249,115,22);
+  doc.rect(0,18,297,5,'F');
+
+  doc.setTextColor(80,80,80);
+  doc.setFontSize(9);
+  doc.setFont('helvetica','normal');
+  doc.text('Data de geracao: '+new Date().toLocaleDateString('pt-BR',{weekday:'long',day:'2-digit',month:'long',year:'numeric'}), 148, 28, {align:'center'});
+
+  // Tabela
+  let total=0;
+  const body=[];
+  [...ST.produtos].sort().forEach(p=>{
+    const info=ST.estoque[p]||{qtd:0,und:'-',setor:'-',valor:0};
+    const t=info.qtd*(info.valor||0); total+=t;
+    let status='OK';
+    if(info.qtd<=0) status='SEM ESTOQUE';
+    else if(info.qtd<2) status='BAIXO';
+    body.push([p, info.und||'-', info.setor||'-', info.qtd, 'R$ '+(info.valor||0).toFixed(2), 'R$ '+t.toFixed(2), status]);
+  });
+
+  doc.autoTable({
+    startY: 32,
+    head:[['PRODUTO','UND','SETOR','ESTOQUE','VL. UNIT.','TOTAL','STATUS']],
+    body: body,
+    theme:'grid',
+    headStyles:{ fillColor:[45,106,45], textColor:[255,255,255], fontSize:8, fontStyle:'bold', halign:'center' },
+    bodyStyles:{ fontSize:7, textColor:[40,40,40] },
+    columnStyles:{
+      0:{cellWidth:90}, 1:{cellWidth:14,halign:'center'}, 2:{cellWidth:22,halign:'center'},
+      3:{cellWidth:16,halign:'center'}, 4:{cellWidth:22,halign:'right'},
+      5:{cellWidth:22,halign:'right'}, 6:{cellWidth:20,halign:'center'}
+    },
+    alternateRowStyles:{ fillColor:[245,251,245] },
+    didParseCell: function(data){
+      if(data.column.index===6 && data.section==='body'){
+        const v=data.cell.raw;
+        if(v==='SEM ESTOQUE') data.cell.styles.textColor=[153,31,31];
+        else if(v==='BAIXO') data.cell.styles.textColor=[197,90,0];
+        else data.cell.styles.textColor=[27,94,32];
+      }
+    },
+    margin:{left:10, right:10}
+  });
+
+  // Rodape com total
+  const finalY = doc.lastAutoTable.finalY+6;
+  doc.setFillColor(45,106,45);
+  doc.roundedRect(180, finalY, 107, 10, 2, 2, 'F');
+  doc.setTextColor(255,255,255);
+  doc.setFontSize(9);
+  doc.setFont('helvetica','bold');
+  doc.text('VALOR TOTAL EM ESTOQUE: R$ '+total.toFixed(2), 233, finalY+6.5, {align:'center'});
+
+  doc.save('estoque_ATR_'+new Date().toLocaleDateString('pt-BR').replace(/\//g,'-')+'.pdf');
+}
+
+function gerarPDFEscala(){
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF({ orientation:'landscape', unit:'mm', format:'a4' });
+  const rows = coletarEscala();
+  const dataEsc = document.getElementById('esc-data').value;
+  const obsG = document.getElementById('esc-obs-geral').value;
+
+  // Cabecalho
+  doc.setFillColor(249,115,22);
+  doc.rect(0,0,297,18,'F');
+  doc.setTextColor(255,255,255);
+  doc.setFontSize(13);
+  doc.setFont('helvetica','bold');
+  doc.text('ATR FILIAL RECIFE - ESCALA', 148, 8, {align:'center'});
+  doc.setFontSize(9);
+  doc.setFont('helvetica','normal');
+  doc.text('Data: '+fmt(dataEsc)+'   |   Gerado em: '+new Date().toLocaleDateString('pt-BR'), 148, 14, {align:'center'});
+
+  doc.setFillColor(45,106,45);
+  doc.rect(0,18,297,4,'F');
+
+  // Semana
+  let semTxt='';
+  if(dataEsc){
+    const d=new Date(dataEsc+'T12:00:00');
+    const dias=['Dom','Seg','Ter','Qua','Qui','Sex','Sab'];
+    const dow=d.getDay();
+    const seg=new Date(d); seg.setDate(d.getDate()-(dow===0?6:dow-1));
+    for(let i=0;i<7;i++){ const dd=new Date(seg); dd.setDate(seg.getDate()+i); semTxt+=dias[dd.getDay()]+' '+dd.toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit'})+'  '; }
+  }
+  doc.setTextColor(45,106,45);
+  doc.setFontSize(8);
+  doc.setFont('helvetica','bold');
+  doc.text('Semana: '+semTxt, 14, 27);
+
+  // Tabela escala
+  const body=[];
+  rows.forEach(r=>{
+    if(!r.vt) return;
+    body.push([
+      r.vt,
+      r.placa,
+      r.mot.substring(0,15),
+      r.hor,
+      '1a\n2a\n3a',
+      r.otr,
+      (r.cli1+'\n'+r.cli2+'\n'+r.cli3).trim(),
+      (r.eq1+'\n'+r.eq2+'\n'+r.eq3).trim(),
+      (r.dst1+'\n'+r.dst2+'\n'+r.dst3).trim(),
+      r.obs
+    ]);
+  });
+
+  doc.autoTable({
+    startY: 30,
+    head:[['VT','PLACA','MOTORISTA','HORARIO','VIAGEM','OTR','CLIENTE','EQUIPAMENTO','DESTINO','OBSERVACOES']],
+    body: body,
+    theme:'grid',
+    headStyles:{ fillColor:[249,115,22], textColor:[255,255,255], fontSize:7, fontStyle:'bold', halign:'center' },
+    bodyStyles:{ fontSize:7, textColor:[40,40,40], valign:'middle' },
+    columnStyles:{
+      0:{cellWidth:12,halign:'center'}, 1:{cellWidth:18,halign:'center'},
+      2:{cellWidth:28}, 3:{cellWidth:14,halign:'center'},
+      4:{cellWidth:12,halign:'center'}, 5:{cellWidth:14,halign:'center'},
+      6:{cellWidth:28}, 7:{cellWidth:24},
+      8:{cellWidth:38}, 9:{cellWidth:38}
+    },
+    alternateRowStyles:{ fillColor:[255,249,245] },
+    margin:{left:10,right:10}
+  });
+
+  if(obsG){
+    const fy=doc.lastAutoTable.finalY+6;
+    doc.setFillColor(240,240,240);
+    doc.roundedRect(10,fy,277,10,2,2,'F');
+    doc.setTextColor(60,60,60);
+    doc.setFontSize(8);
+    doc.setFont('helvetica','bold');
+    doc.text('OBS. GERAIS: ',14,fy+6);
+    doc.setFont('helvetica','normal');
+    doc.text(obsG,45,fy+6);
+  }
+
+  doc.save('escala_ATR_'+(dataEsc||'sem_data').replace(/-/g,'_')+'.pdf');
+}
+</script>
+</body>
+</html>
